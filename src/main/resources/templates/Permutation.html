@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <!-- Popper -->
+    <link rel="stylesheet" th:href="@{css/bootstrap.min.css}">
+    <script th:src="@{js/jquery-3.6.0.min.js}"></script>
+    <script th:src="@{js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{js/bootstrap-autocomplete.min.js}"></script>
+    <script src="extensions/resizable/bootstrap-table-resizable.js"></script>
+    <script th:src="@{js/common.js}"  th:data-url="${'simple'+page+'Html'}"></script>
+    <link rel="stylesheet" th:href="@{css/common.css}">
+
+    <title>Convert to [[${page}]] Boolean Expression Page</title>
+</head>
+<body>
+<form method="post" action="/listingPermutation"onsubmit="return validate()">
+    <div class="input-group input-group-lg has-error has-feedback nm">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">
+                Enter comma separated word
+            </span>
+        </div>
+        <input type="text" tabindex="1" th:value="${words}"
+               class="form-control basicAutoComplete cfc" id="words" name="words"
+               placeholder="Enter comma separated words" autocomplete="on"
+        >
+        <div class="input-group-prepend">
+            <button class="btn btn-primary" type="button" onclick="addSeq()">Add Sequence</button>
+        </div>
+    </div>
+    <center>
+
+        <br/>
+
+        <button class="btn btn-primary" type="submit" id="generate">Submit</button>
+    </center>
+    <br/>
+</form>
+
+    <div class="alert alert-success alert-dismissible fade show" id="success">
+        <strong>Success!</strong> Your expression parsed successfully.
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show" id="error">
+        <strong>Error!</strong> A problem has been occurred while parsing expression.
+    </div>
+
+    <div th:insert="Modal :: modal" th:remove="tag" ></div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <!-- Popper -->
+    <link rel="stylesheet" th:href="@{css/bootstrap.min.css}">
+    <script th:src="@{js/jquery-3.6.0.min.js}"></script>
+    <script th:src="@{js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{js/bootstrap-autocomplete.min.js}"></script>
+    <script src="extensions/resizable/bootstrap-table-resizable.js"></script>
+    <script th:src="@{js/common.js}"  th:data-url="${'simple'+page+'Html'}"></script>
+    <link rel="stylesheet" th:href="@{css/common.css}">
+    <style>
+        td {
+            text-align: center;
+        }
+    </style>
+    <title>Listing</title>
+</head>
+<body>
+    <center>
+        <table border="1" width="100%">
+            <tr>
+                <td><b>Words</b></td>
+                <td colspan="3"><i>[[${words}]]</i></td>
+            </tr>
+            <tr th:if="${isCombination}">
+                <td colspan="2" width="25%">
+                    <center>
+                        <table border="0" width="100%">
+                            <tr>
+                                <td><b>Select</b></td>
+                            </tr>
+                            <tr>
+                                <td><i>[[${select}]]</i></td>
+                            </tr>
+                            <tr>
+                                <td><b>Is Ordered</b></td>
+                            </tr>
+                            <tr>
+                                <td><i>[[${ordered}]]</i></td>
+                            </tr>
+                        </table>
+                    </center>
+
+                </td>
+                <td colspan="2" width="75%">
+                    <center>
+                        <table border="0" width="100%">
+                            <tr>
+                                <td><b>Rules</b></td>
+                            </tr>
+                            <tr th:each="rule : ${rules}">
+                                <td><i>[[${rule}]]</i></td>
+                            </tr>
+                        </table>
+                    </center>
+                </td>
+            </tr>
+        </table>
+
+    <form method="post" th:action="${url}">
+        <input type="hidden" th:each="d, s :${data}" th:name="${d.first}" th:value="${d.second}">
+        <button class="btn btn-primary" type="submit">Edit Criteria</button>
+    </form>
+
+    <br/>
+    <h1>Results</h1>
+        <h5>Count: [[${results.size}]]</h5>
+    <table border="1" width="100%">
+        <tr th:each="result, s :${results}" >
+            <td th:each="d, s :${result}" th:width="${(100/result.size)+'%'}">
+               <i><b>[[${d}]]</b></i>
+            </td>
+        </tr>
+    </table>
+</center>
+
+</body>
+</html>

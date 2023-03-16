@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+
+    <title>Title</title>
+</head>
+<body>
+    <div class="modal fade" id="seqGenerator" tabindex="-1"  th:fragment="modal"
+         role="dialog" aria-labelledby="seqGeneratorLabel" aria-hidden="true">
+        <script>
+            function generateSeq() {
+                const seqTextType = Number($("#seq_text_type").val())
+                const seqText = $("#seq_text").val()
+                const seqConcat = Number($("#seq_concat").val())
+                const seqType = Number($("#seq_type").val())
+                const seqRepeat = Number($("#seq_repeat").val())
+                const seqStart = Number($("#seq_start").val())
+                const seqEnd = Number($("#seq_end").val())
+                const seqStep = Number($("#seq_step").val())
+
+                var str
+
+                if(seqTextType==1) {
+                    var texts
+                    var count=0
+                    if(seqType==0) {
+                        if(seqEnd>0 && seqStep!=0) {
+                            for(var i=0;i<seqEnd;i+=seqStep) {
+                                count++
+                            }
+                        } else {
+                            return false
+                        }
+                    } else {
+                        if((seqStep>0 && seqStart<=seqEnd) || (seqStep<0 && seqStart>=seqEnd)) {
+                            for(var i=seqStart;i<=seqEnd;i+=seqStep) {
+                                count++
+                            }
+                        } else {
+                            return false
+                        }
+
+                    }
+
+                        $.get({
+                            url: "/words/"+(seqText.trim().length==0?" ":seqText.trim())+"/"+count,
+                            dataType: "json",
+                            success: function (data) {
+                                texts=data
+
+                                str = data.join(", ")
+
+                                $("#words").val($("#words").val().trim()+($("#words").val().trim().length==0? '':', ') + str)
+
+                                $('#seqGenerator').modal('hide')
+                            },
+                            error: function() {
+
+                            }
+
+                        })
+
+
+                } else {
+
+                    var seq = []
+
+                    if(seqRepeat && seqText.trim().length==0) return false
+
+                    if(seqType==0) {
+                        if(seqEnd>0 && seqStep!=0) {
+                            for(var i=0;i<seqEnd;i+=seqStep) {
+                                seq.push(seqStart+i)
+                            }
+                        } else {
+                            return false
+                        }
+                    } else {
+                        if((seqStep>0 && seqStart<=seqEnd) || (seqStep<0 && seqStart>=seqEnd)) {
+                            for(var i=seqStart;i<=seqEnd;i+=seqStep) {
+                                seq.push(i)
+                            }
+                        } else {
+                            return false
+                        }
+
+                    }
+
+                    str = seq.map(function(elem) {
+                        if(seqRepeat) return seqText
+                        else if(seqConcat==0) return elem+seqText
+                        else return seqText+elem
+                    }).join(", ")
+
+                    $("#words").val($("#words").val().trim()+($("#words").val().trim().length==0? '':', ') + str)
+
+                    $('#seqGenerator').modal('hide')
+                }
+
+                return true
+            }
+
+            function seqTypeChange() {
+                $('#seq_end_label').html($("#seq_type").val()=='0'?'Count':'Sequence End')
+                seqRepeatChange(!$('#seq_repeat').prop('checked'))
+            }
+
+            function seqTextTextChange() {
+                const repeat = Number($('#seq_text_type').val()==1)
+                $('#repeat').css('visibility', !repeat?"visible":"hidden")
+                seqRepeatChange(repeat)
+            }
+
+            function seqRepeatChange(visibleSeq) {
+                $('#start').css("visibility", visibleSeq?"visible":"hidden")
+                $('#end').css("visibility", visibleSeq?"visible":"hidden")
+                $('#step').css("visibility", visibleSeq?"visible":"hidden")
+
+            }
+
+            function addSeq() {
+                $('#seqGenerator').modal('show')
+
+            }
+
+            $(function() {
+                $('#seqGenerator').on('shown.bs.modal', function () {
+                  $('#seq_text').trigger('focus')
+                })
+            })
+        </script>
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="seqGeneratorLabel">Generate Sequence</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table>
+                        <tr>
+                            <td>Concatenation Type</td>
+                            <td>
+                                <select id="seq_text_type" class="form-control" onchange="seqTextTextChange()">
+                                    <option selected value="0">Static</option>
+                                    <option value="1">Random</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Text</td>
+                            <td><input type="text" class="form-control" id="seq_text"></td>
+                        </tr>
+                        <tr>
+                            <td>Concatenation Type</td>
+                            <td>
+                                <select id="seq_concat" class="form-control">
+                                    <option value="0">Prepend</option>
+                                    <option selected value="1">Append</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Seq Type</td>
+                            <td>
+                                <select id="seq_type" class="form-control" onchange="seqTypeChange()">
+                                    <option selected value="0">By Count</option>
+                                    <option value="1">By End Value</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr id="repeat">
+                            <td>Sequence Blind Repeat</td>
+                            <td><input type="checkbox" class="form-control" onchange="seqRepeatChange(!$(this).prop('checked'))" id="seq_repeat"></td>
+                        </tr>
+                        <tr id="start">
+                            <td>Sequence Start</td>
+                            <td><input type="number" min="0" class="form-control" id="seq_start" value="1"></td>
+                        </tr>
+                        <tr id="end">
+                            <td id="seq_end_label">Count</td>
+                            <td><input type="number" min="0" class="form-control" id="seq_end" VALUE="10"></td>
+                        </tr>
+                        <tr id="step">
+                            <td>Sequence Step</td>
+                            <td><input type="number" class="form-control" id="seq_step" value="1"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" onclick="return generateSeq()" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

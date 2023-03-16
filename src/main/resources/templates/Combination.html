@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+    <!-- Popper -->
+    <link rel="stylesheet" th:href="@{css/bootstrap.min.css}">
+    <script th:src="@{js/jquery-3.6.0.min.js}"></script>
+    <script th:src="@{js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{js/bootstrap-autocomplete.min.js}"></script>
+    <script src="extensions/resizable/bootstrap-table-resizable.js"></script>
+    <script th:src="@{js/common.js}"  th:data-url="${'simple'+page+'Html'}"></script>
+    <link rel="stylesheet" th:href="@{css/common.css}">
+
+    <script>
+
+        const criteria = "[[${criteriaText}]]".split(",").map(function(elem) {
+            const arr = elem.split("|")
+            return {
+                "value": arr[0],
+                "text": arr[1]
+            }
+        })
+
+        const elements = ["criteria", "text", "minCount", "maxCount", "remove"]
+
+        function addSelect() {
+            const tdCriteria = $("<td>")
+
+            const select = $("<select>")
+
+            criteria.forEach(function(opt) {
+
+                const option = $("<option>")
+
+                option.val(opt.value)
+
+                option.html(opt.text)
+
+                option.appendTo(select)
+            })
+
+            select.appendTo(tdCriteria)
+
+            return tdCriteria
+        }
+
+        function addText() {
+
+            const tdText = $("<td>")
+
+            const text = $("<input>")
+            text.attr("type", "text")
+            text.attr("placeholder", "Enter match text")
+
+            text.appendTo(tdText)
+
+            return tdText
+        }
+
+        function addMinMax(text, isNeg) {
+
+            const tdMin = $("<td>")
+
+            const min = $("<input>")
+            min.attr("type", "number")
+            min.attr("min", isNeg?-1:0)
+            min.attr("placeholder", text)
+            min.css("width", "100px")
+
+            min.appendTo(tdMin)
+
+            return tdMin
+        }
+
+        function addRemove() {
+
+            const tdRemove = $("<td>")
+
+            const remove = $("<button>")
+            remove.attr("type", "button")
+            remove.html("Delete")
+
+            remove.appendTo(tdRemove)
+
+            return tdRemove
+        }
+
+        function addRuleRow() {
+            const tr = $("<tr>")
+
+            addSelect().appendTo(tr)
+
+            addText().appendTo(tr)
+
+            addMinMax("Min", false).appendTo(tr)
+
+            addMinMax("Max", true).appendTo(tr)
+
+            addRemove().appendTo(tr)
+
+            return tr
+
+        }
+
+        function addRule() {
+            addRuleRow().appendTo($("#rules"))
+            refresh()
+        }
+
+        function refresh() {
+            $("#ruleCount").val($("#rules").children("tbody").children("tr").length)
+            $("#rules").children("tbody").children("tr").each(function(row, elem) {
+                $(this).attr("id", "row_"+row)
+                $(this).children("td").each(function(column, elem) {
+                    $(this).children().first().attr("id", elements[column]+"_"+row)
+                    $(this).children().first().attr("name", elements[column]+"_"+row)
+                    $(this).children().first().attr("class", "form-control")
+                })
+
+                $("#remove_"+row).attr("disabled", $("#rules").children("tbody").children("tr").length==1)
+
+                $("#remove_"+row).attr("class", "btn btn-primary")
+                    .off("click").click(function(){
+                        $("#row_"+row).remove()
+                        refresh()
+                    })
+            })
+        }
+
+        $(function() {
+            if($("#rules").children("tbody").children("tr").length==0) addRule()
+        })
+
+    </script>
+    <title>Convert to [[${page}]] Boolean Expression Page</title>
+</head>
+<body>
+<form method="post" action="/listingCombination" onsubmit="return validate()">
+    <div class="input-group input-group-lg has-error has-feedback nm">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon1">
+                Enter comma separated word
+            </span>
+        </div>
+        <input type="text" tabindex="1" th:value="${words}"
+               class="form-control basicAutoComplete cfc" id="words" name="words"
+               placeholder="Enter comma separated words" autocomplete="on"
+        >
+        <div class="input-group-prepend">
+            <button class="btn btn-primary" type="button" onclick="addSeq()">Add Sequence</button>
+        </div>
+    </div>
+    <div class="input-group input-group-lg has-error has-feedback nm">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="basic-addon2">
+                Enter select count
+            </span>
+        </div>
+        <input type="number" tabindex="1" th:value="${select}"
+               class="form-control basicAutoComplete cfc" id="select" name="select"
+               placeholder="Enter select count" autocomplete="on"
+        >
+        <div class="input-group-append">
+            <input type="checkbox" tabindex="1" style="width:40px" th:if="${ordered==true}"
+                   checked="checked"
+                   class="form-control basicAutoComplete cfc" th:id="ordered" name="ordered"
+                   placeholder="Ordered output required" autocomplete="on">
+
+            <input type="checkbox" tabindex="1" style="width:40px" th:if="${!ordered}"
+                   class="form-control basicAutoComplete cfc" id="ordered" name="ordered"
+                   placeholder="Ordered output required" autocomplete="on">
+        </div>
+        <div class="input-group-append">
+            <label for="ordered" class="input-group-text" id="basic-addon3">
+                Ordered output required
+            </label>
+        </div>
+    </div>
+    <br/>
+    <center>
+        <button class="btn btn-primary" type="button" onclick="addRule()" id="add">Add Rule</button>
+        <br/>
+        <br/>
+        <input type="hidden" name="ruleCount" id="ruleCount" th:value="${ruleCount}">
+        <table border="0" id="rules" cellpadding="10" cellspacing="10">
+            <tr th:if="${ruleCount>0}" th:each="rule, stat : ${rules}" th:id="${'row_'+stat.index}">
+                <td>
+                    <select th:id="${'criteria_'+stat.index}" th:name="${'criteria_'+stat.index}" class="form-control">
+                        <div th:each="c, s :${criteria}" th:remove="tag">
+                            <option th:if="${c.equals(rule.criteria)}" selected th:value="${c.name}">[[${c.text}]]</option>
+                            <option th:if="${!c.equals(rule.criteria)}" th:value="${c.name}">[[${c.text}]]</option>
+                        </div>
+
+                    </select>
+                </td>
+                <td>
+                    <input type="text" placeholder="Enter match text"
+                           th:value="${rule.string}"
+                           th:id="${'text_'+stat.index}" th:name="${'text_'+stat.index}"
+                           class="form-control" spellcheck="false" 
+                           data-ms-editor="true" wfd-id="id3">
+                </td>
+                <td>
+                    <input type="number" min="0" placeholder="Min"
+                           th:value="${rule.minCount}"
+                           th:id="${'minCount_'+stat.index}" th:name="${'minCount_'+stat.index}"
+                           class="form-control" style="width: 100px;" wfd-id="id4">
+                </td>
+                <td>
+                    <input type="number" min="-1" placeholder="Max"
+                           th:value="${rule.maxCount==T(java.lang.Integer).MAX_VALUE?-1:rule.maxCount}"
+                           th:id="${'maxCount_'+stat.index}" th:name="${'maxCount_'+stat.index}"
+                           class="form-control" style="width: 100px;" wfd-id="id5">
+                </td>
+                <td>
+                    <button type="button" th:id="${'remove_'+stat.index}"
+                            th:name="${'remove_'+stat.index}" class="btn btn-primary"
+                            th:onclick="|$('#row_'+[[${row}]]).remove();refresh()|"
+                            disabled="disabled" th:if="${ruleCount==1}">
+                        Delete
+                    </button>
+                    <button type="button" th:id="${'remove_'+stat.index}"
+                            th:name="${'remove_'+stat.index}" class="btn btn-primary"
+                            th:onclick="|$('#row_'+[[${row}]]).remove();refresh()|"
+                            th:if="${ruleCount>1}">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            </tr>
+        </table>
+
+        <br/>
+
+        <button class="btn btn-primary" type="submit" id="generate">Submit</button>
+    </center>
+    <br/>
+</form>
+
+    <div class="alert alert-success alert-dismissible fade show" id="success">
+        <strong>Success!</strong> Your expression parsed successfully.
+    </div>
+    <div th:if="${!errors.isEmpty()}" class="alert alert-danger alert-dismissible show">
+        <div th:each="error : ${errors}">
+            <strong>Error!</strong> [[${error}]]
+        </div>
+    </div>
+
+    <div th:insert="Modal :: modal" th:remove="tag" ></div>
+</body>
+</html>
