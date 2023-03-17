@@ -24,6 +24,7 @@ class PermutationTests {
 
         print(lists)
 
+
         assertContentEquals(lists.toList().map { it.toList() }, listOf(
             listOf("Blue","Green","Red"),listOf("Blue","Red","Green"),listOf("Green","Blue","Red"),listOf("Green","Red","Blue"),listOf("Red","Blue","Green"),
             listOf("Red","Green","Blue"),

@@ -27,7 +27,9 @@ class CombinationController {
             if(it.isNullOrEmpty()) 0 else it.toInt()
         }
         val _words = request.getParameter("words")
-        val select = request.getParameter("select").toInt()
+        val select = request.getParameter("select").let {
+            if(it.isNullOrBlank()) 0 else it.toInt()
+        }
         val ordered = request.getParameter("ordered").toBoolean()
 
         map["criteriaText"] =
@@ -62,7 +64,10 @@ class CombinationController {
 
         map["rules"] = rules
 
-        map["errors"] = rules.validate(_words.split(",").map { it.trim() } )
+        map["errors"] = if(_words.isNullOrBlank())
+            listOf()
+        else
+            rules.validate(_words.split(",").map { it.trim() } )
 
         return "Combination"
     }
