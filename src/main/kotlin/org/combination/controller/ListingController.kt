@@ -33,7 +33,9 @@ class ListingController {
 
     @RequestMapping("/listingCombination")
     fun combination(request: HttpServletRequest, map: ModelMap): String {
-        val ruleCount = request.getParameter("ruleCount").toInt()
+        val ruleCount = request.getParameter("ruleCount").let {
+            if(it.isNullOrBlank()) 0 else it.toInt()
+        }
         val _words = request.getParameter("words")
         val words = _words.split(",")
             .map { it.trim() }

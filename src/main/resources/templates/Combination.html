@@ -25,89 +25,8 @@
 
         const elements = ["criteria", "text", "minCount", "maxCount", "remove"]
 
-        function addSelect() {
-            const tdCriteria = $("<td>")
-
-            const select = $("<select>")
-
-            criteria.forEach(function(opt) {
-
-                const option = $("<option>")
-
-                option.val(opt.value)
-
-                option.html(opt.text)
-
-                option.appendTo(select)
-            })
-
-            select..selectpicker()
-
-            select.appendTo(tdCriteria)
-
-            return tdCriteria
-        }
-
-        function addText() {
-
-            const tdText = $("<td>")
-
-            const text = $("<input>")
-            text.attr("type", "text")
-            text.attr("placeholder", "Enter match text")
-
-            text.appendTo(tdText)
-
-            return tdText
-        }
-
-        function addMinMax(text, isNeg) {
-
-            const tdMin = $("<td>")
-
-            const min = $("<input>")
-            min.attr("type", "number")
-            min.attr("min", isNeg?-1:0)
-            min.attr("placeholder", text)
-            min.css("width", "100px")
-
-            min.appendTo(tdMin)
-
-            return tdMin
-        }
-
-        function addRemove() {
-
-            const tdRemove = $("<td>")
-
-            const remove = $("<button>")
-            remove.attr("type", "button")
-            remove.html("Delete")
-
-            remove.appendTo(tdRemove)
-
-            return tdRemove
-        }
-
-        function addRuleRow() {
-            const tr = $("<tr>")
-
-            addSelect().appendTo(tr)
-
-            addText().appendTo(tr)
-
-            addMinMax("Min", false).appendTo(tr)
-
-            addMinMax("Max", true).appendTo(tr)
-
-            addRemove().appendTo(tr)
-
-            return tr
-
-        }
-
         function addRule() {
-            addRuleRow().appendTo($("#rules"))
+            $("#example").children("tbody").children("tr").clone().appendTo($("#rules"))
             refresh()
         }
 
@@ -120,8 +39,6 @@
                     $(this).children().first().attr("name", elements[column]+"_"+row)
                     $(this).children().first().attr("class", "form-control")
                 })
-
-                $("#remove_"+row).attr("disabled", $("#rules").children("tbody").children("tr").length==1)
 
                 $("#remove_"+row).attr("class", "btn btn-primary")
                     .off("click").click(function(){
@@ -187,6 +104,7 @@
         <br/>
         <input type="hidden" name="ruleCount" id="ruleCount" th:value="${ruleCount}">
         <table border="0" id="rules" cellpadding="10" cellspacing="10">
+            <tbody>
             <tr th:if="${ruleCount>0}" th:each="rule, stat : ${rules}" th:id="${'row_'+stat.index}">
                 <td>
                     <select th:id="${'criteria_'+stat.index}" th:name="${'criteria_'+stat.index}" class="form-control">
@@ -219,19 +137,12 @@
                 <td>
                     <button type="button" th:id="${'remove_'+stat.index}"
                             th:name="${'remove_'+stat.index}" class="btn btn-primary"
-                            th:onclick="|$('#row_'+[[${row}]]).remove();refresh()|"
-                            disabled="disabled" th:if="${ruleCount==1}">
-                        Delete
-                    </button>
-                    <button type="button" th:id="${'remove_'+stat.index}"
-                            th:name="${'remove_'+stat.index}" class="btn btn-primary"
-                            th:onclick="|$('#row_'+[[${row}]]).remove();refresh()|"
-                            th:if="${ruleCount>1}">
+                            th:onclick="|$('#row_'+[[${row}]]).remove();refresh()|">
                         Delete
                     </button>
                 </td>
             </tr>
-            </tr>
+            </tbody>
         </table>
 
         <br/>
@@ -239,6 +150,38 @@
         <button class="btn btn-primary" type="submit" id="generate">Submit</button>
     </center>
     <br/>
+    <table id="example" style="visibility:hidden">
+        <tr>
+            <td>
+                <select class="form-control">
+                    <div th:each="c, s :${criteria}" th:remove="tag">
+                        <option th:if="${s.index==0}" selected th:value="${c.name}">[[${c.text}]]</option>
+                        <option th:if="${s.index>=0}" th:value="${c.name}">[[${c.text}]]</option>
+                    </div>
+
+                </select>
+            </td>
+            <td>
+                <input type="text" placeholder="Enter match text"
+                       class="form-control" spellcheck="false"
+                       data-ms-editor="true" wfd-id="id3">
+            </td>
+            <td>
+                <input type="number" min="0" placeholder="Min"
+                       class="form-control" style="width: 100px;" wfd-id="id4">
+            </td>
+            <td>
+                <input type="number" min="-1" placeholder="Max"
+                       class="form-control" style="width: 100px;" wfd-id="id5">
+            </td>
+            <td>
+                <button type="button"  class="btn btn-primary">
+                    Delete
+                </button>
+            </td>
+        </tr>
+    </table>
+
 </form>
 
     <div class="alert alert-success alert-dismissible fade show" id="success">
