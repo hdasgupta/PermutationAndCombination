@@ -5,15 +5,38 @@
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <script src="/js/jquery-3.6.0.min.js"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
-    <title>Math Lang</title>
+    <title>Boolean Expression Home Page</title>
+    <script>
+        var n
+        function resize() {
+          const height= Math.floor(($(window).height() - $(".heading").height()) / n)
+          const width= $(window).width()
+          $("a.btn-primary").css("width", width);
+          $("a.btn-primary").attr("width", width);
+          $("a.btn-primary").css("height", height);
+          $("a.btn-primary").attr("height", height);
+        }
+
+        $(document).ready(function(){
+          n = $(".btn-group-vertical").children("a").length;
+          resize()
+          $(window).resize(function() {
+              resize()
+          })
+        })
+
+    </script>
+    <title>Permutation and Combination</title>
 </head>
 <body>
 <center>
-    <h2><u>Permutation and Combination Pages</u></h2>
-    <br />
+    <div class="heading">
+        <h2><u>Permutation and Combination Pages</u></h2>
+        <br />
+    </div>
     <div class="btn-group-vertical">
-        <a href="/permutation"  class="btn btn-secondary">Permutation Page</a>
-        <a href="/combination"  class="btn btn-secondary">Combination Page</a>
+        <a href="/permutation"  class="btn btn-primary">Permutation Page</a>
+        <a href="/combination"  class="btn btn-primary">Combination Page</a>
     </div>
 </center>
 
